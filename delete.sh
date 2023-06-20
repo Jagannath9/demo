@@ -2,11 +2,12 @@
 
 bucket_name="your-bucket-name"
 path="your-folder-path"
-date_to_delete="2023-06-01"  # Specify the specific date you want to delete files from
+start_date="2023-06-01"  # Specify the start date of the range
+end_date="2023-06-30"  # Specify the end date of the range
 prefix="file-prefix"  # Specify the prefix of the files you want to delete
 
-# Get the list of files in the specified path with the specified prefix
-files=$(aws s3api list-objects --bucket "$bucket_name" --prefix "$path" --output json --query "Contents[?LastModified>='$date_to_delete' && starts_with(Key, '$prefix')].Key")
+# Get the list of files in the specified path with the specified prefix within the date range
+files=$(aws s3api list-objects --bucket "$bucket_name" --prefix "$path" --output json --query "Contents[?LastModified>='$start_date' && LastModified<='$end_date' && starts_with(Key, '$prefix')].Key")
 
 # Sort the files by the LastModified date in descending order
 sorted_files=($(echo "$files" | jq -r 'sort_by(.LastModified) | reverse[]'))
