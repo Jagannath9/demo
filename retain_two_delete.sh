@@ -12,11 +12,11 @@ files=$(aws s3api list-objects --bucket "$bucket_name" --prefix "$path" --output
 # Sort the files by the LastModified date in descending order
 sorted_files=($(echo "$files" | jq -r 'sort_by(.LastModified) | reverse[]'))
 
-# Keep the latest file and delete the rest
-latest_file="${sorted_files[0]}"
-for file in "${sorted_files[@]:1}"
+# Keep the latest two files and delete the rest
+latest_files=("${sorted_files[@]:0:2}")
+for file in "${sorted_files[@]:2}"
 do
-    if [[ "$file" != "$latest_file" ]]; then
+    if [[ ! " ${latest_files[@]} " =~ " ${file} " ]]; then
         echo "Deleting $file"
         aws s3api delete-object --bucket "$bucket_name" --key "$file"
     fi
